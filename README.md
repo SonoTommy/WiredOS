@@ -1,0 +1,1 @@
+this is wiredos (actually now only the .sh setup file for LIVE KALI maybe later i will create an iso for persistance and live)
