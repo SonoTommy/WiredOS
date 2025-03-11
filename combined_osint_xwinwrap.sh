@@ -48,16 +48,30 @@ sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' "$PROXYCHAINS_CONF"
 
 echo "[*] (Optional) Installing additional OSINT tools via Proxychains..."
 
-# recon-ng
+# Install recon-ng with a virtual environment
 if [ ! -d "/opt/recon-ng" ]; then
   echo "  -> Installing recon-ng..."
   proxychains git clone https://github.com/lanmaster53/recon-ng.git /opt/recon-ng
+
   cd /opt/recon-ng || exit
-  proxychains pip3 install -r REQUIREMENTS
+
+  # Create a virtual environment (named .venv)
+  python3 -m venv .venv
+
+  # Activate the virtual environment
+  source .venv/bin/activate
+
+  # Install dependencies inside the virtual environment
+  proxychains pip install -r REQUIREMENTS
+
+  # (Optional) Deactivate the venv if needed
+  deactivate
+
   cd - || exit
 else
   echo "  -> /opt/recon-ng already exists, skipping."
 fi
+
 
 # Sherlock
 if [ ! -d "/opt/sherlock" ]; then
