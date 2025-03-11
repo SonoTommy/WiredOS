@@ -1,14 +1,15 @@
 #!/bin/bash
-# Minimal OSINT Setup + Xwinwrap Installer for Kali
+# Minimal OSINT Setup + Xwinwrap Installer + Wallpaper Setter for Kali
 #
 # 1. Downloads a wallpaper GIF into /home/kali/wallpapers.
-# 2. Installs system packages for OSINT:
-#    - Tor, Proxychains, Firefox ESR, Git, Python3-Pip, python3-venv, theHarvester, Dmitry
-# 3. Configures Proxychains to use Tor (socks5 on 127.0.0.1:9050)
-# 4. Clones recon-ng, Sherlock, Holehe, each in /opt with a local .venv for Python dependencies
-# 5. Clones xwinwrap into /home/kali/xwinwrap, compiles and installs it (plus dependencies and mpv)
+# 2. Installs system packages for OSINT (Tor, Proxychains, Firefox ESR, Git, Python3-Pip, python3-venv, theHarvester, Dmitry).
+# 3. Configures Proxychains to use Tor (socks5 on 127.0.0.1:9050).
+# 4. Clones recon-ng, Sherlock, Holehe into /opt, each with a local .venv for Python dependencies.
+# 5. Installs Xwinwrap (cloned into /home/kali/xwinwrap).
+# 6. Sets the wallpaper with xwinwrap + mpv, looping the downloaded GIF.
 #
 # Run this script as root (sudo).
+# Make sure you're logged into an X session if you want the wallpaper to appear immediately.
 
 set -e  # Exit on error
 
@@ -27,7 +28,7 @@ echo "[*] Creating /home/kali/wallpapers directory..."
 mkdir -p /home/kali/wallpapers
 
 echo "[*] Downloading wallpaper_n1.gif into /home/kali/wallpapers..."
-wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n1.gif"
+wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1.0/wallpaper_n1.gif"
 
 ###############################################################################
 # 3. Update and install essential OSINT packages
@@ -156,8 +157,26 @@ make clean
 
 cd ~
 echo "✅ Xwinwrap installation completed!"
+
+###############################################################################
+# 9. Set the wallpaper using xwinwrap + mpv
+###############################################################################
+echo "[*] Attempting to set the wallpaper with xwinwrap..."
+echo "    (Requires a running X session on DISPLAY=:0)"
+
+# If you are indeed logged into an X session on :0, this will immediately set the wallpaper.
+# If you're on a different display or using Wayland, it won't work as expected.
+DISPLAY=:0 xwinwrap -fs -fdt -ni -b -nf -- mpv -wid WID --loop --no-audio --vo=x11 \
+  -vf="scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" \
+  /home/kali/wallpapers/wallpaper_n1.gif &
+
 echo ""
-echo "You can now use xwinwrap to set animated or video wallpapers, for example:"
-echo "  xwinwrap -ni -fs -un -b -nf -- mpv --wid=%WID --loop /home/kali/wallpapers/wallpaper_n1.gif"
+echo "====================================================="
+echo "All steps completed. If you are on Xorg (DISPLAY=:0),"
+echo "you should now see the wallpaper looping via xwinwrap."
+echo "If not, ensure you are running an X session and try:"
 echo ""
-echo "Script finished successfully!"
+echo "   DISPLAY=:0 xwinwrap -fs -fdt -ni -b -nf -- mpv -wid WID --loop --no-audio --vo=x11 \\"
+echo "       -vf=\"scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black\" \\"
+echo "       /home/kali/wallpapers/wallpaper_n1.gif"
+echo "====================================================="
