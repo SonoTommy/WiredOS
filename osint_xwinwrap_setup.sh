@@ -1,10 +1,19 @@
 #!/bin/bash
 # Minimal OSINT Setup + Xwinwrap Installer + Wallpaper Setter for Kali
 #
-# Changes from previous version:
-#  - Installs Sherlock via apt (proxychains) instead of GitHub clone.
-#  - Installs Holehe from GitHub.
-#  - Everything else remains similar to the previous combined script.
+# Changes:
+#  - Holehe is installed via pipx instead of GitHub clone.
+#  - The wallpaper is downloaded from v0.1 (instead of v0.1.0).
+#
+# Steps:
+#  1. Downloads a wallpaper GIF into /home/kali/wallpapers.
+#  2. Installs minimal OSINT essentials: Tor, Proxychains, Firefox ESR, Git, Python3-Pip, python3-venv, theHarvester, Dmitry.
+#  3. Installs pipx, then uses it to install Holehe.
+#  4. Configures Proxychains to use Tor (socks5 on 127.0.0.1:9050).
+#  5. Installs Recon-ng from GitHub in /opt (with a local .venv).
+#  6. Installs Sherlock via apt (with Proxychains).
+#  7. Installs Xwinwrap (cloned into /home/kali/xwinwrap) plus dependencies (mpv, xorg-dev, etc.).
+#  8. Sets the wallpaper with xwinwrap + mpv (if on Xorg at DISPLAY=:0).
 #
 # Run this script as root (sudo).
 # Make sure you're logged into an X session if you want the wallpaper to appear immediately.
@@ -25,8 +34,9 @@ fi
 echo "[*] Creating /home/kali/wallpapers directory..."
 mkdir -p /home/kali/wallpapers
 
-echo "[*] Downloading wallpaper_n1.gif into /home/kali/wallpapers..."
-wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n1.gif"
+echo "[*] Downloading wallpaper_n1.gif from v0.1 into /home/kali/wallpapers..."
+wget -O /home/kali/wallpapers/wallpaper_n1.gif \
+  "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n1.gif"
 
 ###############################################################################
 # 3. Update and install essential OSINT packages
@@ -41,7 +51,17 @@ echo "[*] Starting Tor service..."
 service tor start
 
 ###############################################################################
-# 4. Configure Proxychains
+# 4. Install pipx and Holehe via pipx
+###############################################################################
+echo "[*] Installing pipx..."
+apt-get install -y python3-pipx
+
+echo "[*] Installing Holehe with pipx (via Proxychains)..."
+# If you prefer not to route pipx through Tor, remove 'proxychains'
+proxychains pipx install holehe
+
+###############################################################################
+# 5. Configure Proxychains
 ###############################################################################
 echo "[*] Backing up and configuring Proxychains..."
 PROXYCHAINS_CONF="/etc/proxychains.conf"
@@ -55,7 +75,7 @@ sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' "$PROXYCHAINS_CONF"
 # sed -i 's/^#dynamic_chain/dynamic_chain/' "$PROXYCHAINS_CONF"
 
 ###############################################################################
-# 5. Helper function to create a venv and install requirements
+# 6. Helper function to create a venv and install requirements
 ###############################################################################
 create_venv_and_install() {
   local repo_dir="$1"
@@ -79,9 +99,8 @@ create_venv_and_install() {
 }
 
 ###############################################################################
-# 6. Install Additional OSINT Tools
+# 7. Install Recon-ng from GitHub (with local venv)
 ###############################################################################
-# 6a. Recon-ng (from GitHub, in /opt)
 echo "[*] Installing recon-ng..."
 if [ ! -d "/opt/recon-ng" ]; then
   proxychains git clone https://github.com/lanmaster53/recon-ng.git /opt/recon-ng
@@ -91,22 +110,14 @@ else
   create_venv_and_install "/opt/recon-ng" "REQUIREMENTS"
 fi
 
-# 6b. Holehe (from GitHub, in /opt)
-echo "[*] Installing Holehe..."
-if [ ! -d "/opt/holehe" ]; then
-  proxychains git clone https://github.com/megadose/holehe.git /opt/holehe
-  create_venv_and_install "/opt/holehe" "requirements.txt"
-else
-  echo "    -> /opt/holehe already exists, skipping clone."
-  create_venv_and_install "/opt/holehe" "requirements.txt"
-fi
-
-# 6c. Sherlock (from apt, using proxychains)
-echo "[*] Installing Sherlock via apt..."
+###############################################################################
+# 8. Install Sherlock via apt
+###############################################################################
+echo "[*] Installing Sherlock via apt (with Proxychains)..."
 proxychains apt-get install -y sherlock
 
 ###############################################################################
-# 7. Clean up OSINT environment
+# 9. Clean up OSINT environment
 ###############################################################################
 echo "[*] Cleaning up unused packages..."
 apt-get autoremove -y
@@ -116,8 +127,8 @@ apt-get clean
 echo ""
 echo "[*] Minimal OSINT environment installed!"
 echo "[*] Tools installed system-wide: theHarvester, Dmitry, Sherlock"
-echo "[*] Tools cloned in /opt: recon-ng, Holehe"
-echo "    Each has a local Python venv in its own folder (.venv)."
+echo "[*] Tools installed via pipx: Holehe (check 'pipx list')"
+echo "[*] Recon-ng cloned in /opt/recon-ng with a local Python venv (.venv)."
 echo ""
 echo "=== Usage Instructions for OSINT Tools ==="
 echo "1. To run Firefox via Tor, use:"
@@ -129,16 +140,13 @@ echo "     cd /opt/recon-ng"
 echo "     source .venv/bin/activate"
 echo "     python recon-ng"
 echo "   Then 'deactivate' to exit the venv."
-echo ""
-echo "4. To run Holehe (as an example):"
-echo "     cd /opt/holehe"
-echo "     source .venv/bin/activate"
+echo "4. To run Holehe (installed via pipx):"
 echo "     holehe --help"
-echo "   Then 'deactivate' to exit the venv."
+echo "   (Ensure pipx is in your PATH; open a new shell or run 'pipx ensurepath'.)"
 echo ""
 
 ###############################################################################
-# 8. Xwinwrap Installation
+# 10. Xwinwrap Installation
 ###############################################################################
 echo "[*] Installing xwinwrap dependencies..."
 apt-get update
@@ -160,14 +168,12 @@ cd ~
 echo "✅ Xwinwrap installation completed!"
 
 ###############################################################################
-# 9. Set the wallpaper using xwinwrap + mpv
+# 11. Set the wallpaper using xwinwrap + mpv
 ###############################################################################
 echo "[*] Attempting to set the wallpaper with xwinwrap..."
 echo "    (Requires a running X session on DISPLAY=:0)"
 echo ""
 
-# If you are indeed logged into an X session on :0, this will immediately set the wallpaper.
-# If you're on a different display or using Wayland, it won't work as expected.
 DISPLAY=:0 xwinwrap -fs -fdt -ni -b -nf -- mpv -wid WID --loop --no-audio --vo=x11 \
   -vf="scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" \
   /home/kali/wallpapers/wallpaper_n1.gif &
