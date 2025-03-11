@@ -1,37 +1,34 @@
 #!/bin/bash
 # OSINT Setup Script for Kali Live
-# - Installs various OSINT tools (without requiring API keys)
-# - Configures Proxychains to use Tor with Firefox ESR
-# - Downloads all tools via Proxychains to help avoid fingerprinting
+#
+# This script performs the following steps:
+# 1. Updates the system.
+# 2. Installs the Kali OSINT meta-package along with system tools:
+#    - Tor, Proxychains, Firefox ESR, Git, and Python3-Pip.
+# 3. Installs additional OSINT tools (recon-ng, Sherlock, Holehe) via Proxychains.
+# 4. Configures Proxychains to route traffic through Tor (socks5 on 127.0.0.1:9050).
+# 5. Provides instructions to launch Firefox with enhanced privacy settings.
+#
+# Note: Ensure you run this script as root.
 
-# Must be run as root
+# Check if running as root
 if [ "$EUID" -ne 0 ]; then
   echo "Please run this script as root (using sudo)."
   exit 1
 fi
 
-echo "Updating the system..."
-proxychains apt update && proxychains apt upgrade -y
+echo "Step 1: Updating the system..."
+sudo apt update && sudo apt upgrade -y
 
-echo "Installing Tor, Proxychains, Firefox ESR, Git, and Python3-Pip..."
-proxychains apt install -y tor proxychains firefox-esr git python3-pip
+echo "Step 2: Installing system tools and OSINT meta-package..."
+sudo apt install -y kali-tools-osint tor proxychains firefox-esr git python3-pip
 
-echo "Starting Tor..."
+echo "Starting Tor service..."
 service tor start
 
-echo "Backing up and configuring Proxychains..."
-PROXYCHAINS_CONF="/etc/proxychains.conf"
-cp $PROXYCHAINS_CONF ${PROXYCHAINS_CONF}.bak
+echo "Step 3: Installing additional OSINT tools via Proxychains..."
 
-# Configure Proxychains to use Tor (socks5 on 127.0.0.1:9050)
-sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' $PROXYCHAINS_CONF
-
-echo "Installing OSINT tools with Proxychains..."
-
-# theHarvester (available in Kali repositories)
-proxychains apt install -y theharvester
-
-# Recon-ng
+# Install recon-ng
 if [ ! -d "/opt/recon-ng" ]; then
   proxychains git clone https://github.com/lanmaster53/recon-ng.git /opt/recon-ng
   cd /opt/recon-ng || exit
@@ -39,12 +36,12 @@ if [ ! -d "/opt/recon-ng" ]; then
   cd -
 fi
 
-# Sherlock
+# Install Sherlock
 if [ ! -d "/opt/sherlock" ]; then
   proxychains git clone https://github.com/sherlock-project/sherlock.git /opt/sherlock
 fi
 
-# Holehe
+# Install Holehe
 if [ ! -d "/opt/holehe" ]; then
   proxychains git clone https://github.com/megadose/holehe.git /opt/holehe
   cd /opt/holehe || exit
@@ -52,31 +49,17 @@ if [ ! -d "/opt/holehe" ]; then
   cd -
 fi
 
-# Amass (an OSINT tool for mapping and discovery)
-proxychains apt install -y amass
+echo "Step 4: Configuring Proxychains..."
+PROXYCHAINS_CONF="/etc/proxychains.conf"
+sudo cp $PROXYCHAINS_CONF ${PROXYCHAINS_CONF}.bak
 
-# Sublist3r (subdomain enumeration tool)
-if [ ! -d "/opt/Sublist3r" ]; then
-  proxychains git clone https://github.com/aboul3la/Sublist3r.git /opt/Sublist3r
-  cd /opt/Sublist3r || exit
-  proxychains pip3 install -r requirements.txt
-  cd -
-fi
+# Configure Proxychains to use Tor (socks5 on 127.0.0.1:9050)
+sudo sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' $PROXYCHAINS_CONF
 
-# Dmitry (Deepmagic Information Gathering Tool)
-proxychains apt install -y dmitry
-
-echo "Installation completed."
-
+echo "Step 5: Additional Firefox configurations:"
+echo " - To run Firefox through Tor, use:"
+echo "       proxychains firefox-esr"
+echo " - For further privacy, open about:config in Firefox and set 'privacy.resistFingerprinting' to 'true'."
+echo " - You may also install privacy add-ons such as CanvasBlocker."
 echo ""
-echo "=== Additional Configurations ==="
-echo "1. To run Firefox via Tor, use the following command:"
-echo "      proxychains firefox-esr"
-echo ""
-echo "2. To further reduce fingerprinting in Firefox:"
-echo "   - Open about:config and set 'privacy.resistFingerprinting' to 'true'."
-echo "   - Consider installing privacy add-ons such as CanvasBlocker."
-echo ""
-echo "3. You can add more OSINT tools later as needed."
-echo ""
-echo "Script completed."
+echo "OSINT Setup Script completed."
