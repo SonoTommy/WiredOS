@@ -6,7 +6,7 @@
 #    - Tor, Proxychains, Firefox ESR, Git, Python3-Pip, python3-venv, theHarvester, Dmitry
 # 3. Configures Proxychains to use Tor (socks5 on 127.0.0.1:9050)
 # 4. Clones recon-ng, Sherlock, Holehe, each in /opt with a local .venv for Python dependencies
-# 5. Installs Xwinwrap (plus dependencies and mpv)
+# 5. Clones xwinwrap into /home/kali/xwinwrap, compiles and installs it (plus dependencies and mpv)
 #
 # Run this script as root (sudo).
 
@@ -27,10 +27,10 @@ echo "[*] Creating /home/kali/wallpapers directory..."
 mkdir -p /home/kali/wallpapers
 
 echo "[*] Downloading wallpaper_n1.gif into /home/kali/wallpapers..."
-wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n1.gif"
+wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1.0/wallpaper_n1.gif"
 
 ###############################################################################
-# 3. Update and install essential packages
+# 3. Update and install essential OSINT packages
 ###############################################################################
 echo "[*] Updating package lists..."
 apt-get update
@@ -142,18 +142,19 @@ echo "[*] Installing xwinwrap dependencies..."
 apt-get update
 apt-get install -y xorg-dev build-essential libx11-dev x11proto-xext-dev libxrender-dev libxext-dev mpv
 
-echo "[*] Cloning xwinwrap repository..."
+echo "[*] Cloning xwinwrap repository into /home/kali..."
+cd /home/kali
 git clone https://github.com/mmhobi7/xwinwrap.git
-cd xwinwrap
 
-echo "[*] Compiling xwinwrap..."
+echo "[*] Compiling and installing xwinwrap..."
+cd xwinwrap
 make
 sudo make install
 
 echo "[*] Cleaning up xwinwrap build files..."
 make clean
-cd ..
 
+cd ~
 echo "✅ Xwinwrap installation completed!"
 echo ""
 echo "You can now use xwinwrap to set animated or video wallpapers, for example:"
