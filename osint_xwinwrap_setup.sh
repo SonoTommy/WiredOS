@@ -27,7 +27,7 @@ echo "[*] Creating /home/kali/wallpapers directory..."
 mkdir -p /home/kali/wallpapers
 
 echo "[*] Downloading wallpaper_n1.gif into /home/kali/wallpapers..."
-wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1.0/wallpaper_n1.gif"
+wget -O /home/kali/wallpapers/wallpaper_n1.gif "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n1.gif"
 
 ###############################################################################
 # 3. Update and install essential packages
