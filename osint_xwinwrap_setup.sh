@@ -53,8 +53,8 @@ service tor start
 ###############################################################################
 # 4. Install pipx and Holehe via pipx
 ###############################################################################
-echo "[*] Installing pipx..."
-apt-get install -y python3-pipx
+#echo "[*] Installing pipx..."
+#apt-get install -y python3-pipx
 
 echo "[*] Installing Holehe with pipx (via Proxychains)..."
 # If you prefer not to route pipx through Tor, remove 'proxychains'
