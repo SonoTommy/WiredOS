@@ -1,65 +1,93 @@
 #!/bin/bash
-# OSINT Setup Script for Kali Live
+# Minimal OSINT Setup Script for Kali Live
 #
-# This script performs the following steps:
-# 1. Updates the system.
-# 2. Installs the Kali OSINT meta-package along with system tools:
-#    - Tor, Proxychains, Firefox ESR, Git, and Python3-Pip.
-# 3. Installs additional OSINT tools (recon-ng, Sherlock, Holehe) via Proxychains.
-# 4. Configures Proxychains to route traffic through Tor (socks5 on 127.0.0.1:9050).
-# 5. Provides instructions to launch Firefox with enhanced privacy settings.
+# Installs:
+#   - System essentials: Tor, Proxychains, Firefox ESR, Git, Python3-Pip
+#   - Lightweight OSINT tools: theHarvester, dmitry
+#   - Additional OSINT tools (cloned via Git with Proxychains): recon-ng, Sherlock, Holehe
+# Configures Proxychains to use Tor (socks5 on 127.0.0.1:9050).
 #
-# Note: Ensure you run this script as root.
+# Note: Run as root.
 
-# Check if running as root
+# 1. Check if running as root
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run this script as root (using sudo)."
+  echo "Please run this script as root (e.g., sudo ./osint_setup.sh)."
   exit 1
 fi
 
-echo "Step 1: Updating the system..."
-sudo apt update && sudo apt upgrade -y
+# 2. Update package lists (skipping full upgrade to save space)
+echo "[*] Updating package lists..."
+apt-get update
 
-echo "Step 2: Installing system tools and OSINT meta-package..."
-sudo apt install -y kali-tools-osint tor proxychains firefox-esr git python3-pip
+# 3. Install essential packages
+echo "[*] Installing essential packages..."
+apt-get install -y tor proxychains firefox-esr git python3-pip theharvester dmitry
 
-echo "Starting Tor service..."
+# 4. Start Tor service
+echo "[*] Starting Tor service..."
 service tor start
 
-echo "Step 3: Installing additional OSINT tools via Proxychains..."
+# 5. Configure Proxychains to use Tor
+echo "[*] Backing up and configuring Proxychains..."
+PROXYCHAINS_CONF="/etc/proxychains.conf"
+cp "$PROXYCHAINS_CONF" "${PROXYCHAINS_CONF}.bak"
 
-# Install recon-ng
+# Use SOCKS5 on 127.0.0.1:9050
+sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' "$PROXYCHAINS_CONF"
+
+# 6. Clone and install additional OSINT tools via Proxychains
+
+# recon-ng
+echo "[*] Installing recon-ng..."
 if [ ! -d "/opt/recon-ng" ]; then
   proxychains git clone https://github.com/lanmaster53/recon-ng.git /opt/recon-ng
   cd /opt/recon-ng || exit
   proxychains pip3 install -r REQUIREMENTS
-  cd -
+  cd - || exit
+else
+  echo "    -> /opt/recon-ng already exists, skipping."
 fi
 
-# Install Sherlock
+# Sherlock
+echo "[*] Installing Sherlock..."
 if [ ! -d "/opt/sherlock" ]; then
   proxychains git clone https://github.com/sherlock-project/sherlock.git /opt/sherlock
+else
+  echo "    -> /opt/sherlock already exists, skipping."
 fi
 
-# Install Holehe
+# Holehe
+echo "[*] Installing Holehe..."
 if [ ! -d "/opt/holehe" ]; then
   proxychains git clone https://github.com/megadose/holehe.git /opt/holehe
   cd /opt/holehe || exit
   proxychains pip3 install -r requirements.txt
-  cd -
+  cd - || exit
+else
+  echo "    -> /opt/holehe already exists, skipping."
 fi
 
-echo "Step 4: Configuring Proxychains..."
-PROXYCHAINS_CONF="/etc/proxychains.conf"
-sudo cp $PROXYCHAINS_CONF ${PROXYCHAINS_CONF}.bak
+# 7. Clean up to save space
+echo "[*] Cleaning up unused packages and cache..."
+apt-get autoremove -y
+apt-get autoclean -y
+apt-get clean
+# Optionally remove the local apt cache if needed:
+# rm -rf /var/cache/apt/archives/*
 
-# Configure Proxychains to use Tor (socks5 on 127.0.0.1:9050)
-sudo sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' $PROXYCHAINS_CONF
-
-echo "Step 5: Additional Firefox configurations:"
-echo " - To run Firefox through Tor, use:"
-echo "       proxychains firefox-esr"
-echo " - For further privacy, open about:config in Firefox and set 'privacy.resistFingerprinting' to 'true'."
-echo " - You may also install privacy add-ons such as CanvasBlocker."
 echo ""
-echo "OSINT Setup Script completed."
+echo "[*] Minimal OSINT installation completed."
+echo ""
+echo "=== Usage Instructions ==="
+echo "1. To launch Firefox via Tor, run:"
+echo "     proxychains firefox-esr"
+echo ""
+echo "2. For more privacy in Firefox, open about:config and set:"
+echo "     privacy.resistFingerprinting = true"
+echo "   And consider installing privacy add-ons like CanvasBlocker."
+echo ""
+echo "3. Tools installed:"
+echo "   - theHarvester, dmitry (installed via apt)"
+echo "   - recon-ng, Sherlock, Holehe (cloned in /opt)"
+echo ""
+echo "Enjoy your minimal OSINT environment!"
