@@ -46,14 +46,10 @@ apt-get install -y tor proxychains git python3-pip python3-venv theharvester dmi
 echo "[*] Starting Tor service..."
 service tor start
 
-###############################################################################
-# 4. Install pipx and Holehe via pipx
-###############################################################################
-echo "[*] Installing Holehe with pipx (using Proxychains)..."
-proxychains pipx install holehe
+
 
 ###############################################################################
-# 5. Configure Proxychains
+# 4. Configure Proxychains
 ###############################################################################
 echo "[*] Backing up and configuring Proxychains..."
 PROXYCHAINS_CONF="/etc/proxychains.conf"
@@ -64,7 +60,7 @@ sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' "$PROXYCHAINS_CONF"
 # sed -i 's/^#dynamic_chain/dynamic_chain/' "$PROXYCHAINS_CONF"
 
 ###############################################################################
-# 6. Helper function to create a virtual environment and install requirements
+# 5. Helper function to create a virtual environment and install requirements
 ###############################################################################
 create_venv_and_install() {
   local repo_dir="$1"
@@ -85,7 +81,7 @@ create_venv_and_install() {
 }
 
 ###############################################################################
-# 7. Install Recon-ng from GitHub (with local virtual environment)
+# 6. Install Recon-ng from GitHub (with local virtual environment)
 ###############################################################################
 echo "[*] Installing Recon-ng..."
 if [ ! -d "/opt/recon-ng" ]; then
@@ -95,6 +91,13 @@ else
   echo "    -> /opt/recon-ng already exists, skipping clone."
   create_venv_and_install "/opt/recon-ng" "REQUIREMENTS"
 fi
+
+###############################################################################
+# 7. Install Holehe via pipx (with proxychains)
+###############################################################################
+echo "[*] Installing Holehe with pipx..."
+proxychains pipx install holehe
+
 
 ###############################################################################
 # 8. Install Sherlock via apt
@@ -221,6 +224,12 @@ else
     echo "[*] Adding alias cw2 to $BASHRC..."
     echo "$ALIAS_LINE" >> "$BASHRC"
 fi
+
+
+
+
+
+
 
 
 
