@@ -42,7 +42,8 @@ done
 ###############################################################################
 echo "[*] Aggiornamento dei repository e installazione dei pacchetti necessari..."
 apt-get update
-apt-get install -y tor proxychains git python3-pip python3-venv theharvester dmitry iptables-persistent build-essential xorg-dev libx11-dev x11proto-xext-dev libxrender-dev libxext-dev mpv
+apt-get install -y tor proxychains git python3-pip python3-venv theharvester dmitry iptables-persistent \
+                   build-essential xorg-dev libx11-dev x11proto-xext-dev libxrender-dev libxext-dev mpv
 
 ###############################################################################
 # 4. Configurazione di Tor per forzare DNS e traffico tramite TransPort
@@ -121,6 +122,10 @@ cd - >/dev/null || exit
 echo "[*] Installazione di Holehe tramite pipx..."
 proxychains pipx install holehe
 
+# Aggiunge automaticamente la directory di pipx al PATH
+echo "[*] Eseguo pipx ensurepath per aggiungere /root/.local/bin al PATH (se necessario)..."
+proxychains pipx ensurepath
+
 echo "[*] Installazione di Sherlock tramite apt..."
 proxychains apt-get install -y sherlock
 
@@ -128,7 +133,6 @@ proxychains apt-get install -y sherlock
 # 10. Installazione di xwinwrap per wallpaper dinamici
 ###############################################################################
 echo "[*] Installazione delle dipendenze per xwinwrap..."
-# (xorg-dev, build-essential, ecc. già installati)
 echo "[*] Clonazione e compilazione di xwinwrap..."
 cd /home/kali
 git clone https://github.com/mmhobi7/xwinwrap.git
@@ -220,6 +224,10 @@ echo "Strumenti installati:"
 echo "  - OSINT: theHarvester, Dmitry, Sherlock, Recon-ng (in /opt/recon-ng con venv), Holehe (pipx)"
 echo "  - Ambiente anonimo: traffico forzato tramite Tor con iptables e Proxychains, DNS configurato su 127.0.0.1"
 echo "  - Wallpaper dinamici con xwinwrap e mpv (default: wallpaper_n1.gif)"
+echo ""
+echo "IMPORTANTE: se pipx ha aggiunto /root/.local/bin al tuo PATH in .bashrc,"
+echo "            riapri la shell o esegui 'source /root/.bashrc' per renderlo effettivo."
+echo ""
 echo "Per cambiare il wallpaper, usa:"
 echo "  sudo /usr/local/bin/change_wallpaper2.sh [numero da 1 a 7]"
 echo "Oppure, apri una nuova shell per usare l'alias 'cw2'"

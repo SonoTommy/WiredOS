@@ -8,3 +8,10 @@ cd WiredOS
 chmod +x wiredos.sh
 
 sudo ./wiredos.sh
+
+for change BG do 
+sudo /usr/local/bin/chnage_wallpaper2.sh [number from 1 to 7]"
+
+example 
+
+sudo /usr/local/bin/chnage_wallpaper2.sh 3
