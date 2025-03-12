@@ -119,12 +119,13 @@ cd - >/dev/null || exit
 ###############################################################################
 # 9. Installazione di Holehe tramite pipx e Sherlock tramite apt (con proxychains)
 ###############################################################################
-echo "[*] Installazione di Holehe tramite pipx..."
-proxychains pipx install holehe
 
 # Aggiunge automaticamente la directory di pipx al PATH
 echo "[*] Eseguo pipx ensurepath per aggiungere /root/.local/bin al PATH (se necessario)..."
 proxychains pipx ensurepath
+
+echo "[*] Installazione di Holehe tramite pipx..."
+proxychains pipx install holehe
 
 echo "[*] Installazione di Sherlock tramite apt..."
 proxychains apt-get install -y sherlock
