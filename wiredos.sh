@@ -1,5 +1,5 @@
 #!/bin/bash
-# Minimal OSINT Setup + Xwinwrap Installer + Wallpaper Setter for Kali
+# WiredOS LIVE
 #
 # Note:
 #  - All wallpapers wallpaper_n1.gif to wallpaper_n7.gif are downloaded, with wallpaper_n1.gif as the default.
