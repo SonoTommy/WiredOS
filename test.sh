@@ -1,13 +1,20 @@
 #!/bin/bash
 # OSINT_SAFE_SETUP.sh
-# Configurazione OSINT migliorata per anonimato e sicurezza su Kali LIVE
+# Configurazione OSINT migliorata per anonimato e sicurezza
 #
-# NOTE SPECIALI PER KALI LIVE:
-# - Se stai usando Kali Live senza una partizione/file di persistenza,
-#   tutte o gran parte delle modifiche andranno perse al riavvio.
-# - Se hai abilitato la persistenza (persistent storage), le modifiche
-#   sopravvivranno ai reboot. Assicurati di salvare questo script e i file
-#   necessari nella partizione di persistenza.
+# Questo script esegue le seguenti operazioni:
+# 1. Scarica wallpapers in /home/kali/wallpapers.
+# 2. Aggiorna e installa pacchetti essenziali (inclusi tor, proxychains, iptables-persistent e tool OSINT).
+# 3. Configura Tor per usare DNSPort (9053) e TransPort (9040).
+# 4. Configura Proxychains per usare socks5 su Tor.
+# 5. Imposta iptables per forzare tutto il traffico (DNS, HTTP e HTTPS) attraverso Tor.
+# 6. Configura il resolver DNS per utilizzare 127.0.0.1.
+# 7. Installa e isola Recon-ng in un ambiente virtuale.
+# 8. Installa Holehe tramite pipx e Sherlock tramite apt (entrambi con proxychains).
+# 9. Installa xwinwrap e configura il wallpaper dinamico.
+# 10. Crea uno script per cambiare il wallpaper e aggiunge l’alias "cw2".
+#
+# Esegui questo script come root (es. sudo ./OSINT_SAFE_SETUP.sh)
 
 set -e  # Interrompe lo script in caso di errore
 
@@ -17,18 +24,6 @@ set -e  # Interrompe lo script in caso di errore
 if [ "$EUID" -ne 0 ]; then
   echo "Per favore esegui questo script come root (es. sudo ./OSINT_SAFE_SETUP.sh)."
   exit 1
-fi
-
-###############################################################################
-# 1.b Verifica se stiamo in live con (o senza) persistenza
-###############################################################################
-# Se vuoi, puoi aggiungere un controllo più specifico per la persistenza:
-# Ad esempio, Kali Live con persistenza di solito ha "persistence" in /proc/cmdline.
-if ! grep -q "persistence" /proc/cmdline; then
-  echo "[!] Sembra che tu stia eseguendo Kali Live senza persistenza abilitata."
-  echo "    Le modifiche andranno perse al riavvio, a meno che tu non abbia configurato la persistenza in altro modo."
-  echo "    Premi INVIO per continuare oppure Ctrl+C per annullare."
-  read -r
 fi
 
 ###############################################################################
@@ -99,7 +94,6 @@ netfilter-persistent save
 echo "[*] Configurazione del resolver DNS per utilizzare 127.0.0.1..."
 echo "nameserver 127.0.0.1" > /etc/resolv.conf
 # Nota: se usi NetworkManager, potresti dover rendere permanente questa configurazione.
-# Su Kali Live, /etc/resolv.conf potrebbe essere rigenerato ad ogni reboot.
 
 ###############################################################################
 # 8. Installazione di Recon-ng in /opt/recon-ng con ambiente virtuale isolato
@@ -125,8 +119,10 @@ cd - >/dev/null || exit
 ###############################################################################
 # 9. Installazione di Holehe tramite pipx e Sherlock tramite apt (con proxychains)
 ###############################################################################
+echo "[*] Installazione di Holehe tramite pipx..."
+proxychains pipx install holehe
 
-
+# Aggiunge automaticamente la directory di pipx al PATH
 echo "[*] Eseguo pipx ensurepath per aggiungere /root/.local/bin al PATH (se necessario)..."
 proxychains pipx ensurepath
 
@@ -217,25 +213,20 @@ fi
 ###############################################################################
 # 12. Pulizia finale
 ###############################################################################
-echo "[*] Installazione di Holehe tramite pipx..."
-proxychains pipx install holehe
 echo "[*] Pulizia dei pacchetti inutilizzati..."
 apt-get autoremove -y
 apt-get autoclean -y
 apt-get clean
 
 echo "====================================================="
-echo "Configurazione OSINT migliorata (Kali LIVE) completata!"
+echo "Configurazione OSINT migliorata completata!"
 echo "Strumenti installati:"
 echo "  - OSINT: theHarvester, Dmitry, Sherlock, Recon-ng (in /opt/recon-ng con venv), Holehe (pipx)"
 echo "  - Ambiente anonimo: traffico forzato tramite Tor con iptables e Proxychains, DNS configurato su 127.0.0.1"
 echo "  - Wallpaper dinamici con xwinwrap e mpv (default: wallpaper_n1.gif)"
 echo ""
-echo "IMPORTANTE:"
-echo "  1) pipx ha aggiunto /root/.local/bin al tuo PATH (se non era già presente)."
-echo "     Riapri la sessione o esegui 'source /root/.bashrc' per rendere effettive le modifiche."
-echo "  2) Se sei in Kali Live SENZA persistenza, queste modifiche andranno perse al riavvio."
-echo "     Con persistenza abilitata, invece, rimarranno."
+echo "IMPORTANTE: pipx ha aggiunto /root/.local/bin al tuo PATH (se non era già presente)."
+echo "            Riapri la sessione o esegui 'source /root/.bashrc' per rendere effettive le modifiche."
 echo ""
 echo "Per cambiare il wallpaper, usa:"
 echo "  sudo /usr/local/bin/change_wallpaper2.sh [numero da 1 a 7]"
