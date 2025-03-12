@@ -38,7 +38,7 @@ echo "[*] Updating package lists..."
 apt-get update
 
 echo "[*] Installing essential OSINT packages..."
-apt-get install -y tor proxychains firefox-esr git python3-pip python3-venv theharvester dmitry
+apt-get install -y tor proxychains git python3-pip python3-venv theharvester dmitry
 
 echo "[*] Starting Tor service..."
 service tor start
