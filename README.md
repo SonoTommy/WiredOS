@@ -15,3 +15,5 @@ sudo /usr/local/bin/chnage_wallpaper2.sh [number from 1 to 7]"
 example 
 
 sudo /usr/local/bin/chnage_wallpaper2.sh 3
+
+Install manually holehe with proxychains pipx install hole
