@@ -211,10 +211,20 @@ EOF
 
 chmod +x /usr/local/bin/change_wallpaper2.sh
 
-echo "[*] Adding alias 'cw2' to root's .bashrc..."
-if ! grep -q "alias cw2=" /root/.bashrc; then
-  echo "alias cw2='/usr/local/bin/change_wallpaper2.sh'" >> /root/.bashrc
+BASHRC="/home/kali/.bashrc"
+ALIAS_LINE="alias cw2='sudo /usr/local/bin/change_wallpaper2.sh'"
+
+# Check if the alias is already in .bashrc
+if grep -Fxq "$ALIAS_LINE" "$BASHRC"; then
+    echo "[*] Alias cw2 is already present in $BASHRC."
+else
+    echo "[*] Adding alias cw2 to $BASHRC..."
+    echo "$ALIAS_LINE" >> "$BASHRC"
 fi
+
+# Source the .bashrc as the kali user so the alias is immediately usable
+echo "[*] Sourcing $BASHRC as the kali user..."
+su - kali -c "source ~/.bashrc && echo '[*] cw2 alias is now available for user kali.'"
 
 echo "====================================================="
 echo "All operations have been completed."
