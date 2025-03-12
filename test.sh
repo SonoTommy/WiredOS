@@ -125,8 +125,7 @@ cd - >/dev/null || exit
 ###############################################################################
 # 9. Installazione di Holehe tramite pipx e Sherlock tramite apt (con proxychains)
 ###############################################################################
-echo "[*] Installazione di Holehe tramite pipx..."
-proxychains pipx install holehe
+
 
 echo "[*] Eseguo pipx ensurepath per aggiungere /root/.local/bin al PATH (se necessario)..."
 proxychains pipx ensurepath
@@ -218,7 +217,8 @@ fi
 ###############################################################################
 # 12. Pulizia finale
 ###############################################################################
-source /root/.bashrc
+echo "[*] Installazione di Holehe tramite pipx..."
+proxychains pipx install holehe
 echo "[*] Pulizia dei pacchetti inutilizzati..."
 apt-get autoremove -y
 apt-get autoclean -y
