@@ -222,20 +222,16 @@ else
     echo "$ALIAS_LINE" >> "$BASHRC"
 fi
 
-# Source the .bashrc as the kali user so the alias is immediately usable
-echo "[*] Sourcing $BASHRC as the kali user..."
-su - kali -c "source ~/.bashrc && echo '[*] cw2 alias is now available for user kali.'"
+
 
 echo "====================================================="
 echo "All operations have been completed."
 echo "By default, wallpaper_n1.gif is used."
 echo "A second wallpaper changer script has been created at:"
 echo "  /usr/local/bin/change_wallpaper2.sh"
-echo "An alias 'cw2' was added to /root/.bashrc."
-echo ""
 echo "To change the wallpaper, open a new shell (or run 'source /root/.bashrc') and use:"
-echo "   cw2 [number from 1 to 7]"
+echo "   sudo /usr/local/bin/chnage_wallpaper2.sh [number from 1 to 7]"
 echo "For example:"
-echo "   cw2 3"
+echo "   sudo /usr/local/bin/chnage_wallpaper2.sh 3"
 echo "This will change the xwinwrap background to the selected wallpaper."
 echo "====================================================="
