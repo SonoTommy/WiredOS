@@ -119,13 +119,12 @@ cd - >/dev/null || exit
 ###############################################################################
 # 9. Installazione di Holehe tramite pipx e Sherlock tramite apt (con proxychains)
 ###############################################################################
+echo "[*] Installazione di Holehe tramite pipx..."
+proxychains pipx install holehe
 
 # Aggiunge automaticamente la directory di pipx al PATH
 echo "[*] Eseguo pipx ensurepath per aggiungere /root/.local/bin al PATH (se necessario)..."
 proxychains pipx ensurepath
-
-echo "[*] Installazione di Holehe tramite pipx..."
-proxychains pipx install holehe
 
 echo "[*] Installazione di Sherlock tramite apt..."
 proxychains apt-get install -y sherlock
@@ -226,8 +225,8 @@ echo "  - OSINT: theHarvester, Dmitry, Sherlock, Recon-ng (in /opt/recon-ng con 
 echo "  - Ambiente anonimo: traffico forzato tramite Tor con iptables e Proxychains, DNS configurato su 127.0.0.1"
 echo "  - Wallpaper dinamici con xwinwrap e mpv (default: wallpaper_n1.gif)"
 echo ""
-echo "IMPORTANTE: se pipx ha aggiunto /root/.local/bin al tuo PATH in .bashrc,"
-echo "            riapri la shell o esegui 'source /root/.bashrc' per renderlo effettivo."
+echo "IMPORTANTE: pipx ha aggiunto /root/.local/bin al tuo PATH (se non era già presente)."
+echo "            Riapri la sessione o esegui 'source /root/.bashrc' per rendere effettive le modifiche."
 echo ""
 echo "Per cambiare il wallpaper, usa:"
 echo "  sudo /usr/local/bin/change_wallpaper2.sh [numero da 1 a 7]"
