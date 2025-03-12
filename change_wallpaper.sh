@@ -2,9 +2,9 @@
 # Minimal OSINT Setup + Xwinwrap Installer + Wallpaper Setter for Kali
 #
 # Note:
-#  - Ora vengono scaricati tutti i wallpaper_nx.gif dove x da 1 a 7, con default n1.
-#  - Viene creato uno script in /usr/local/bin/change_wallpaper.sh e un alias "cw"
-#    per cambiare il background di xwinwrap.
+#  - All wallpapers wallpaper_n1.gif to wallpaper_n7.gif are downloaded, with wallpaper_n1.gif as the default.
+#  - A script is created at /usr/local/bin/change_wallpaper.sh and an alias "cw" is added
+#    to change the xwinwrap background.
 #
 # Run this script as root (sudo).
 # Make sure you're logged into an X session if you want the wallpaper to appear immediately.
@@ -46,7 +46,7 @@ service tor start
 ###############################################################################
 # 4. Install pipx and Holehe via pipx
 ###############################################################################
-echo "[*] Installing Holehe with pipx (via Proxychains)..."
+echo "[*] Installing Holehe with pipx (using Proxychains)..."
 proxychains pipx install holehe
 
 ###############################################################################
@@ -61,7 +61,7 @@ sed -i 's/^socks4.*/socks5\t127.0.0.1\t9050/' "$PROXYCHAINS_CONF"
 # sed -i 's/^#dynamic_chain/dynamic_chain/' "$PROXYCHAINS_CONF"
 
 ###############################################################################
-# 6. Helper function to create a venv and install requirements
+# 6. Helper function to create a virtual environment and install requirements
 ###############################################################################
 create_venv_and_install() {
   local repo_dir="$1"
@@ -82,9 +82,9 @@ create_venv_and_install() {
 }
 
 ###############################################################################
-# 7. Install Recon-ng from GitHub (with local venv)
+# 7. Install Recon-ng from GitHub (with local virtual environment)
 ###############################################################################
-echo "[*] Installing recon-ng..."
+echo "[*] Installing Recon-ng..."
 if [ ! -d "/opt/recon-ng" ]; then
   proxychains git clone https://github.com/lanmaster53/recon-ng.git /opt/recon-ng
   create_venv_and_install "/opt/recon-ng" "REQUIREMENTS"
@@ -96,7 +96,7 @@ fi
 ###############################################################################
 # 8. Install Sherlock via apt
 ###############################################################################
-echo "[*] Installing Sherlock via apt (with Proxychains)..."
+echo "[*] Installing Sherlock via apt (using Proxychains)..."
 proxychains apt-get install -y sherlock
 
 ###############################################################################
@@ -111,7 +111,7 @@ echo ""
 echo "[*] Minimal OSINT environment installed!"
 echo "[*] Tools installed system-wide: theHarvester, Dmitry, Sherlock"
 echo "[*] Tools installed via pipx: Holehe (check 'pipx list')"
-echo "[*] Recon-ng cloned in /opt/recon-ng with a local Python venv (.venv)."
+echo "[*] Recon-ng cloned in /opt/recon-ng with a local Python virtual environment (.venv)."
 echo ""
 
 ###############################################################################
@@ -151,9 +151,28 @@ echo "[*] Creating wallpaper changer script /usr/local/bin/change_wallpaper.sh..
 
 cat << 'EOF' > /usr/local/bin/change_wallpaper.sh
 #!/bin/bash
-# Script per cambiare il wallpaper di xwinwrap.
-# Uso: change_wallpaper.sh [1-7]
+# Script to change the wallpaper using xwinwrap.
+# Usage: change_wallpaper.sh [1-7]
+
 WALLPAPER_DIR="/home/kali/wallpapers"
+
+# Check if xwinwrap is installed
+if ! command -v xwinwrap &> /dev/null; then
+    echo "Error: xwinwrap is not installed. Please install it before using this script."
+    exit 1
+fi
+
+# Check if mpv is installed
+if ! command -v mpv &> /dev/null; then
+    echo "Error: mpv is not installed. Please install it before using this script."
+    exit 1
+fi
+
+# Verify that the DISPLAY variable is set
+if [ -z "$DISPLAY" ]; then
+    echo "Error: The DISPLAY variable is not set. Make sure you are running an X session."
+    exit 1
+fi
 
 if [ -z "$1" ]; then
   echo "Usage: change_wallpaper.sh [1-7]"
@@ -162,43 +181,44 @@ fi
 
 WP_NUM="$1"
 if [[ "$WP_NUM" -lt 1 || "$WP_NUM" -gt 7 ]]; then
-  echo "Errore: Scegli un numero tra 1 e 7."
+  echo "Error: Please choose a number between 1 and 7."
   exit 1
 fi
 
 WALLPAPER_FILE="$WALLPAPER_DIR/wallpaper_n${WP_NUM}.gif"
 
 if [ ! -f "$WALLPAPER_FILE" ]; then
-  echo "Errore: Il file $WALLPAPER_FILE non esiste."
+  echo "Error: File $WALLPAPER_FILE does not exist."
   exit 1
 fi
 
-echo "Cambiando il wallpaper in wallpaper_n${WP_NUM}.gif..."
+echo "Changing wallpaper to wallpaper_n${WP_NUM}.gif..."
 
-# Termina eventuali istanze di xwinwrap in esecuzione
+# Terminate any running instances of xwinwrap and mpv
 pkill xwinwrap || true
+pkill mpv || true
 
-# Avvia xwinwrap con il nuovo wallpaper
+# Launch xwinwrap with the new wallpaper using mpv
 DISPLAY=:0 xwinwrap -fs -fdt -ni -b -nf -- mpv -wid WID --loop --no-audio --vo=x11 \
-  -vf="scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" \
+  -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" \
   "$WALLPAPER_FILE" &
 
-echo "Wallpaper cambiato in wallpaper_n${WP_NUM}.gif"
+echo "Wallpaper changed to wallpaper_n${WP_NUM}.gif"
 EOF
 
 chmod +x /usr/local/bin/change_wallpaper.sh
 
-echo "[*] Aggiungo l'alias 'cw' al file .bashrc di root..."
+echo "[*] Adding alias 'cw' to root's .bashrc..."
 if ! grep -q "alias cw=" /root/.bashrc; then
   echo "alias cw='/usr/local/bin/change_wallpaper.sh'" >> /root/.bashrc
 fi
 
 echo "====================================================="
-echo "Tutte le operazioni sono state completate."
-echo "Di default viene usato wallpaper_n1.gif."
-echo "Per cambiare il wallpaper, apri una nuova shell (o esegui 'source /root/.bashrc') e usa:"
-echo "   cw [numero da 1 a 7]"
-echo "Ad esempio:"
+echo "All operations have been completed."
+echo "By default, wallpaper_n1.gif is used."
+echo "To change the wallpaper, open a new shell (or run 'source /root/.bashrc') and use:"
+echo "   cw [number from 1 to 7]"
+echo "For example:"
 echo "   cw 3"
-echo "Cambia il background di xwinwrap al wallpaper scelto."
+echo "This will change the xwinwrap background to the selected wallpaper."
 echo "====================================================="
