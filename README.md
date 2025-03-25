@@ -1,6 +1,6 @@
 # WiredOS – Enhanced OSINT & Anonymity Setup
 
-**WiredOS** is a streamlined configuration script for live sessions that improves your OSINT toolkit and anonymity. It sets up:
+**WiredOS** is a streamlined configuration script for live sessions (LIVE wiredosLIVE.sh PERSISTENT wiredos.sh) that improves your OSINT toolkit and anonymity. It sets up:
 - **Secure OSINT tools:** theHarvester, Dmitry, Sherlock, Recon-ng (in an isolated virtual environment), and Holehe.
 - **Anonymous network routing:** forces all traffic through Tor via iptables and Proxychains.
 - **Dynamic desktop experience:** with animated wallpapers using xwinwrap and mpv.
