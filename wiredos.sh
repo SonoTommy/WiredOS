@@ -1,6 +1,7 @@
 #!/bin/bash
-# WiredOS - Persistent OSINT Configuration
-# This version sets up the OSINT environment and ensures the dynamic wallpaper persists across reboots.
+# WiredOS - Persistent OSINT Configuration with Animated Background at Reboot
+# This version sets up the OSINT environment and ensures the animated background
+# runs automatically on reboot via both an autostart entry and a systemd user service.
 # NOTE: Run this script as root (e.g., sudo ./OSINT_SAFE_SETUP_PERSISTENT.sh)
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -187,7 +188,7 @@ else
 fi
 
 ###############################################################################
-# 12. Create the autostart file for the dynamic wallpaper (persistent)
+# 12. Create autostart entry for the dynamic wallpaper
 ###############################################################################
 echo "[*] Creating autostart file for the dynamic wallpaper..."
 AUTOSTART_DIR="/home/kali/.config/autostart"
@@ -205,7 +206,32 @@ Comment=Sets the dynamic wallpaper using xwinwrap and mpv
 EOF
 
 ###############################################################################
-# 13. Final cleanup
+# 13. Create systemd user service for the animated background
+###############################################################################
+echo "[*] Creating systemd user service for the dynamic wallpaper..."
+SYSTEMD_USER_DIR="/home/kali/.config/systemd/user"
+mkdir -p "$SYSTEMD_USER_DIR"
+
+cat << 'EOF' > "$SYSTEMD_USER_DIR/dynamic-wallpaper.service"
+[Unit]
+Description=Dynamic Wallpaper Service
+After=graphical.target
+
+[Service]
+Type=simple
+Environment=DISPLAY=:0
+ExecStart=/usr/local/bin/change_wallpaper2.sh 1
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Reload and enable the systemd user service (run as user kali)
+su - kali -c "systemctl --user daemon-reload && systemctl --user enable dynamic-wallpaper.service && systemctl --user start dynamic-wallpaper.service"
+
+###############################################################################
+# 14. Final cleanup
 ###############################################################################
 echo "[*] Cleaning up unused packages..."
 apt-get autoremove -y
@@ -213,11 +239,11 @@ apt-get autoclean -y
 apt-get clean
 
 echo "====================================================="
-echo "Persistent OSINT configuration completed!"
+echo "Persistent OSINT configuration with animated background completed!"
 echo "Installed tools:"
 echo "  - OSINT: theHarvester, Dmitry, Sherlock, Recon-ng (in /opt/recon-ng with venv), Holehe (pipx)"
 echo "  - Anonymous environment: traffic forced through Tor (via iptables and Proxychains), DNS set to 127.0.0.1"
-echo "  - Dynamic wallpaper: xwinwrap and mpv (default: wallpaper_n1.gif, persistent via autostart)"
+echo "  - Dynamic wallpaper: xwinwrap and mpv (default: wallpaper_n1.gif, persistent via autostart and systemd service)"
 echo ""
 echo "To change the wallpaper manually, use:"
 echo "  sudo /usr/local/bin/change_wallpaper2.sh [number from 1 to 7]"
