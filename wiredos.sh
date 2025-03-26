@@ -17,11 +17,11 @@ fi
 ###############################################################################
 # 2. Create wallpapers directory and download wallpapers
 ###############################################################################
-echo "[*] Creating directory /home/kali/wallpapers and downloading wallpapers..."
-mkdir -p /home/kali/wallpapers
+echo "[*] Creating directory /home/lain/wallpapers and downloading wallpapers..."
+mkdir -p /home/lain/wallpapers
 for i in {1..7}; do
   echo "[*] Downloading wallpaper_n${i}.gif..."
-  wget -O /home/kali/wallpapers/wallpaper_n${i}.gif \
+  wget -O /home/lain/wallpapers/wallpaper_n${i}.gif \
     "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n${i}.gif"
 done
 
@@ -111,7 +111,7 @@ proxychains apt-get install -y sherlock
 # 10. Install xwinwrap for dynamic wallpapers
 ###############################################################################
 echo "[*] Installing xwinwrap..."
-cd /home/kali
+cd /home/lain
 git clone https://github.com/mmhobi7/xwinwrap.git
 cd xwinwrap
 make
@@ -124,7 +124,7 @@ echo "✅ xwinwrap installed successfully!"
 echo "[*] Setting default wallpaper (wallpaper_n1.gif)..."
 DISPLAY=:0 xwinwrap -fs -fdt -ni -b -nf -- mpv -wid WID --loop --no-audio --vo=x11 \
   -vf "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black" \
-  /home/kali/wallpapers/wallpaper_n1.gif &
+  /home/lain/wallpapers/wallpaper_n1.gif &
 
 ###############################################################################
 # 11. Create the wallpaper change script and alias "cw2"
@@ -135,7 +135,7 @@ cat << 'EOF' > /usr/local/bin/change_wallpaper2.sh
 # Script to change the wallpaper using xwinwrap.
 # Usage: change_wallpaper2.sh [1-7]
 
-WALLPAPER_DIR="/home/kali/wallpapers"
+WALLPAPER_DIR="/home/lain/wallpapers"
 
 if ! command -v xwinwrap &> /dev/null; then
     echo "Error: xwinwrap is not installed or not in PATH."
@@ -178,7 +178,7 @@ EOF
 
 chmod +x /usr/local/bin/change_wallpaper2.sh
 
-BASHRC="/home/kali/.bashrc"
+BASHRC="/home/lain/.bashrc"
 ALIAS_LINE="alias cw2='sudo /usr/local/bin/change_wallpaper2.sh'"
 if ! grep -Fxq "$ALIAS_LINE" "$BASHRC"; then
   echo "[*] Adding alias cw2 to $BASHRC..."
@@ -191,7 +191,7 @@ fi
 # 12. Create autostart entry for the dynamic wallpaper
 ###############################################################################
 echo "[*] Creating autostart file for the dynamic wallpaper..."
-AUTOSTART_DIR="/home/kali/.config/autostart"
+AUTOSTART_DIR="/home/lain/.config/autostart"
 mkdir -p "$AUTOSTART_DIR"
 
 cat << 'EOF' > "$AUTOSTART_DIR/dynamic-wallpaper.desktop"
@@ -209,7 +209,7 @@ EOF
 # 13. Create systemd user service for the animated background
 ###############################################################################
 echo "[*] Creating systemd user service for the dynamic wallpaper..."
-SYSTEMD_USER_DIR="/home/kali/.config/systemd/user"
+SYSTEMD_USER_DIR="/home/lain/.config/systemd/user"
 mkdir -p "$SYSTEMD_USER_DIR"
 
 cat << 'EOF' > "$SYSTEMD_USER_DIR/dynamic-wallpaper.service"
@@ -227,8 +227,8 @@ Restart=on-failure
 WantedBy=default.target
 EOF
 
-# Reload and enable the systemd user service (run as user kali)
-su - kali -c "systemctl --user daemon-reload && systemctl --user enable dynamic-wallpaper.service && systemctl --user start dynamic-wallpaper.service"
+# Reload and enable the systemd user service (run as user lain)
+su - lain -c "systemctl --user daemon-reload && systemctl --user enable dynamic-wallpaper.service && systemctl --user start dynamic-wallpaper.service"
 
 ###############################################################################
 # 14. Final cleanup
