@@ -34,7 +34,7 @@ mkdir -p /home/kali/wallpapers
 for i in {1..7}; do
   echo "[*] Downloading wallpaper_n${i}.gif..."
   wget -O /home/kali/wallpapers/wallpaper_n${i}.gif \
-    "https://github.com/JustSouichi/WiredOS/releases/download/v0.1/wallpaper_n${i}.gif"
+    "https://github.com/SonoTommy/WiredOS/releases/download/v0.1/wallpaper_n${i}.gif"
 done
 
 ###############################################################################
